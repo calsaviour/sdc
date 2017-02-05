@@ -1,3 +1,5 @@
+*.exe
+*_Data
 data
 .ipynb_checkpoints
 *.h5
