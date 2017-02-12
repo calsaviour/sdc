@@ -1,3 +1,6 @@
+*.meta
+*.index
+*.data*
 *.exe
 *_Data
 data
@@ -15,3 +18,4 @@ models
 *.pyc
 .DS_Store
 multilayer_perceptron
+checkpoint
