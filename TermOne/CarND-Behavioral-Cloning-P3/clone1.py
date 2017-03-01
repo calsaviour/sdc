@@ -17,9 +17,8 @@ for line in lines:
     current_path = '../data/IMG/' + filename
     image = cv2.imread(current_path)
     images.append(image)
-
-  measurement = float(line[3])
-  measurements.append(measurement)
+    measurement = float(line[3])
+    measurements.append(measurement)
 
 ## Image Augmentation
 augmented_images, augmented_measurements = [], []
@@ -39,8 +38,7 @@ from keras.layers.pooling import MaxPooling2D
 
 ## LeNet Model
 model = Sequential()
-model.add(Lambda(lambda x: (x / 255.0) - 0.5), input_shape=(160,320,3))
-model.add(Cropping2D(cropping=((70,25), (0,0))))
+model.add(Lambda(lambda x: x / 255.0 - 0.5, input_shape=(160,320,3)))
 model.add(Convolution2D(6,5,5,activation="relu"))
 model.add(MaxPooling2D())
 model.add(Convolution2D(6,5,5,activation="relu"))
