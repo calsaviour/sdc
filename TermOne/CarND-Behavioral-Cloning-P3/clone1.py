@@ -17,18 +17,16 @@ for line in lines:
     current_path = '../data/IMG/' + filename
     image = cv2.imread(current_path)
     images.append(image)
-
-for line in lines:
-  measurement = float(line[3])
-  measurements.append(measurement)
+    measurement = float(line[3])
+    measurements.append(measurement)
 
 ## Image Augmentation
-# augmented_images, augmented_measurements = [], []
-# for image, measurement in zip(images, measurements):
-#   augmented_images.append(images)
-#   augmented_measurements.append(measurement)
-#   augmented_images.append(cv2.flip(image,1))
-#   augmented_measurements.append(measurement*-1.0)
+augmented_images, augmented_measurements = [], []
+for image, measurement in zip(images, measurements):
+  augmented_images.append(image)
+  augmented_measurements.append(measurement)
+  augmented_images.append(cv2.flip(image,1))
+  augmented_measurements.append(measurement*-1.0)
 
 X_train = np.array(augmented_images)
 y_train = np.array(augmented_measurements)
