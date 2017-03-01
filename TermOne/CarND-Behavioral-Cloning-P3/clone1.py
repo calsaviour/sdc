@@ -23,12 +23,12 @@ for line in lines:
   measurements.append(measurement)
 
 ## Image Augmentation
-augmented_images, augmented_measurements = [], []
-for image, measurement in zip(images, measurements):
-  augmented_images.append(images)
-  augmented_measurements.append(measurement)
-  augmented_images.append(cv2.flip(image,1))
-  augmented_measurements.append(measurement*-1.0)
+# augmented_images, augmented_measurements = [], []
+# for image, measurement in zip(images, measurements):
+#   augmented_images.append(images)
+#   augmented_measurements.append(measurement)
+#   augmented_images.append(cv2.flip(image,1))
+#   augmented_measurements.append(measurement*-1.0)
 
 X_train = np.array(augmented_images)
 y_train = np.array(augmented_measurements)
