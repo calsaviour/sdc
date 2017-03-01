@@ -4,6 +4,7 @@
 *.exe
 *_Data
 data
+data_given
 .ipynb_checkpoints
 *.h5
 models
