@@ -4,9 +4,12 @@
 ### Write up document for Behavioral Cloning Project
 
 [//]: # (Image References)
-[original_image]: ./images/original_image.jpg "Original Image"
+[example_images]: ./images/example_images.jpg "Example Images"
+[center_image]: ./images/center_image.jpg "Center Image"
 [left_image]: ./images/left_image.jpg "Left Image"
 [right_image]: ./images/right_image.jpg "Right Image"
+[histogram_image]: ./images/steering_histogram.jpg "Histogram Image"
+[steering_group_image]: ./images/steering_group.jpg "steering_group Image"
 
 ### Goal and Objective
 
@@ -121,12 +124,41 @@ The dateset used was given by Udacity.
 
 This increasees the training dataset
 
-Original, Left and Right Images
+### Example of Dataset Captured by the simulator
 
-Below are examples of data images capture by the simulator
+### Sample Dataset Images
 
-![Original Image][original_image]       ![Left Image][left_image]                    ![Right Image][right_image]
+The training set images and corresponding angles in radian are shown in the image below
 
+![Example Images][example_images]    
+
+## Original, Left and Right Images
+
+Below are examples of data images capture by the simulator. 
+
+
+
+The simulator has 3 camera sample frame for every movement it makes. Below are the examples
+
+### Center Image
+![Center Image][center_image]       
+
+### Left Original Image
+![Left Image][left_image]                    
+
+### Right Original Image
+![Right Image][right_image]
+
+
+### Steering Histogram Distribution
+
+Based on the generated histogram , 0 rad in steering has a high frequency
+
+### Steering Histogram
+![Histogram Image][histogram_image]       
+
+### Steering Data Group by Positive and Negative
+![Group Image][steering_group_image]    
 
 
 ```python
