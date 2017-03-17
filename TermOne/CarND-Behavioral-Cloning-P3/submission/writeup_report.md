@@ -8,8 +8,8 @@
 [center_image]: ./images/center_image.jpg "Center Image"
 [left_image]: ./images/left_image.jpg "Left Image"
 [right_image]: ./images/right_image.jpg "Right Image"
-[histogram_image]: ./images/steering_histogram.jpg "Histogram Image"
-[steering_group_image]: ./images/steering_group.jpg "steering_group Image"
+[steering_histrogram_image]: ./images/steering_angles_measurement.jpg "Steering Histogram Image"
+[augmented_steering_histogram_image]: ./images/augmented_steering_angles_measurement.jpg "Augmented Steering Histogram Image"
 
 ### Goal and Objective
 
@@ -152,13 +152,16 @@ The simulator has 3 camera sample frame for every movement it makes. Below are t
 
 ### Steering Histogram Distribution
 
-Based on the generated histogram , 0 rad in steering has a high frequency
+Based on the generated histogram , 0 rad in steering has a highest frequency with a count over 12000.
 
 ### Steering Histogram
-![Histogram Image][histogram_image]       
+![Steering Histogram Image][steering_histrogram_image]       
 
-### Steering Data Group by Positive and Negative
-![Group Image][steering_group_image]    
+### Augmented Steering Histogram
+
+The dataset images were augmented, below is the corresponding augmented steering angle histogram distribution
+
+![Augmented Steering Image][augmented_steering_histogram_image]    
 
 
 ```python
