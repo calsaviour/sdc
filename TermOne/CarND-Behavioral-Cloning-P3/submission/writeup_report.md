@@ -132,7 +132,7 @@ The training set images and corresponding angles in radian are shown in the imag
 
 ![Example Images][example_images]    
 
-## Original, Left and Right Images
+## Center, Left and Right Images
 
 Below are examples of data images capture by the simulator. 
 
