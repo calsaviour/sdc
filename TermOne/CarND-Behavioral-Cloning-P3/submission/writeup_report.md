@@ -5,6 +5,8 @@
 
 [//]: # (Image References)
 [original_image]: ./images/original_image.jpg "Original Image"
+[left_image]: ./images/left_image.jpg "Left Image"
+[right_image]: ./images/right_image.jpg "Right Image"
 
 ### Goal and Objective
 
@@ -119,9 +121,11 @@ The dateset used was given by Udacity.
 
 This increasees the training dataset
 
-Original Image
+Original, Left and Right Images
 
-![Original Image][original_image]
+Below are examples of data images capture by the simulator
+
+![Original Image][original_image]       ![Left Image][left_image]                    ![Right Image][right_image]
 
 
 
