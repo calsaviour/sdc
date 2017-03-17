@@ -3,6 +3,9 @@
 
 ### Write up document for Behavioral Cloning Project
 
+[//]: # (Image References)
+[original_image]: ./images/original_image.jpg "Original Image"
+
 ### Goal and Objective
 
 ### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
@@ -85,15 +88,6 @@ IMG directory has the central, right and left frame of the driving data. Each ro
 Training data provided by Udacity was split to a ratio of 80:20. 80% for training and 20% for validation.
 
 
-### Data Processing
-
-1.The images was cropped top 70 pixels and bottom 25 pixels as suggested by the tutorial in the video
-2.Images were also augemented by flipping it 180 degrees
-3.Augmented measurements were also added by negating the values.
-
-This increasees the training dataset
-
-
 ### Architecture and Training Documentation
 
 #### 1. Solution Design Approach
@@ -113,6 +107,22 @@ At the end of the process, the vehicle is able to drive autonomously around the 
 #### 2. Final Model Architecture
 
 Please refer to Model Architecture and Training Strategy section
+
+#### 3. Creation of Training Set & Training Process
+
+The dateset used was given by Udacity.
+
+
+- The images was cropped top 70 pixels and bottom 25 pixels as suggested by the tutorial in the video
+- Images were also augemented by flipping it 180 degrees
+- Augmented measurements were also added by negating the values.
+
+This increasees the training dataset
+
+Original Image
+
+![Original Image][original_image]
+
 
 
 ```python
