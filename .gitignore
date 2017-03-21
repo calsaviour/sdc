@@ -11,6 +11,7 @@ models
 *.swp
 *.p
 *.jpg
+*.png
 *.gz
 *.zip
 *.mp4
