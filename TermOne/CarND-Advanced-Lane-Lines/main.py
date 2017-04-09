@@ -72,21 +72,40 @@ def cal_undistort(img, objpoints, imgpoints, mtx, dist):
 
 ########################### Pipeline ################################################
 
+def count_check(line):
+    """ Resets to using new sliding windows below if
+    upon failing five times in a row.
+    """
+    if line.counter >= 5:
+        line.detected = False
 
-def pipeline(img, s_thresh=(170, 255), sx_thresh=(20, 100)):
-    img = np.copy(img)
-    # Convert to HSV color space and separate the V channel
-    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HLS).astype(np.float)
-    l_channel = hsv[:,:,1]
-    s_channel = hsv[:,:,2]
+# Edit this function to create your own pipeline.
+def pipeline(img, s_thresh=(125, 255), sx_thresh=(30, 100), R_thresh=(200, 255)):
+
+    distorted_img = np.copy(img)
+    dst = cv2.undistort(distorted_img, mtx, dist, None, mtx)
+    
+    # Convert to HLS color space
+    hls = cv2.cvtColor(dst, cv2.COLOR_RGB2HLS).astype(np.float)
+    l_channel = hls[:,:,1]
+    s_channel = hls[:,:,2]
+    
+    gray = cv2.cvtColor(testOneImage, cv2.COLOR_RGB2GRAY)
+    R = dst[:,:,0]
+    
+    
     # Sobel x
-    sobelx = cv2.Sobel(l_channel, cv2.CV_64F, 1, 0) # Take the derivative in x
+    sobelx = cv2.Sobel(l_channel, cv2.CV_64F, 1, 0, ksize=3) # Take the derivative in x
     abs_sobelx = np.absolute(sobelx) # Absolute x derivative to accentuate lines away from horizontal
     scaled_sobel = np.uint8(255*abs_sobelx/np.max(abs_sobelx))
     
     # Threshold x gradient
     sxbinary = np.zeros_like(scaled_sobel)
     sxbinary[(scaled_sobel >= sx_thresh[0]) & (scaled_sobel <= sx_thresh[1])] = 1
+    
+    # Threshold R color channel
+    R_binary = np.zeros_like(R)
+    R_binary[(R >= R_thresh[0]) & (R <= R_thresh[1])] = 1
     
     # Threshold color channel
     s_binary = np.zeros_like(s_channel)
@@ -99,6 +118,10 @@ def pipeline(img, s_thresh=(170, 255), sx_thresh=(20, 100)):
     # Combine the two binary thresholds
     combined_binary = np.zeros_like(sxbinary)
     combined_binary[(s_binary == 1) | (sxbinary == 1)] = 1
+    
+    combined_binary[((s_binary == 1) & (sxbinary == 1)) | ((sxbinary == 1) & (R_binary == 1))
+                 | ((s_binary == 1) & (R_binary == 1))] = 1
+    
     return color_binary, combined_binary
 
 def birds_eye(img, mtx, dist):
@@ -204,7 +227,7 @@ def draw_first_line(img, mtx, dist):
     # Upon the error being thrown, set line.detected to False
     # Left line first
     try: 
-        n = 5
+        n = 15
         left_line.current_fit = np.polyfit(lefty, leftx, 2)
         left_line.all_x = leftx
         left_line.all_y = lefty
@@ -225,7 +248,7 @@ def draw_first_line(img, mtx, dist):
 
     # Next, right line    
     try:
-        n = 5
+        n = 15
         right_line.current_fit = np.polyfit(righty, rightx, 2)
         right_line.all_x = rightx
         right_line.all_y = righty
@@ -267,8 +290,8 @@ def draw_lines(img, mtx, dist):
     binary_warped, perspective_M = birds_eye(img, mtx, dist)
 
     # Check if lines were last detected; if not, re-run first_lines
-    if left_line.detected == False | right_line.detected == False:
-        draw_first_line(img, mtx, dist)
+    #if left_line.detected == False | right_line.detected == False:
+    draw_first_line(img, mtx, dist)
 
     # Set the fit as the current fit for now
     left_fit = left_line.current_fit
@@ -292,7 +315,7 @@ def draw_lines(img, mtx, dist):
     # Similar to first_lines, need to try in case of errors
     # Left line first
     try: 
-        n = 5
+        n = 15
         left_line.current_fit = np.polyfit(lefty, leftx, 2)
         left_line.all_x = leftx
         left_line.all_y = lefty
@@ -313,7 +336,7 @@ def draw_lines(img, mtx, dist):
 
     # Now right line    
     try:
-        n = 5
+        n = 15
         right_line.current_fit = np.polyfit(righty, rightx, 2)
         right_line.all_x = rightx
         right_line.all_y = righty
@@ -457,7 +480,7 @@ if __name__ == "__main__":
 
     # Convert to video
     # vid_output is where the image will be saved to
-    vid_output = 'output.mp4'
+    vid_output = 'output2.mp4'
 
     # The file referenced in clip1 is the original video before anything has been done to it
     clip1 = VideoFileClip("project_video.mp4")

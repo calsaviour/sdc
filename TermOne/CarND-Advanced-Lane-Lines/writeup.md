@@ -105,7 +105,7 @@ plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
 ```
 
 
-![png](chessboard-undistort.png)
+![png](output_9_0.png)
 
 
 # Pipeline (Single Images)
@@ -123,12 +123,12 @@ plt.imshow(testOneImage)
 
 
 
-    <matplotlib.image.AxesImage at 0x88c9e48>
+    <matplotlib.image.AxesImage at 0x75b3b38>
 
 
 
 
-![png](test-image-to-test-pipeline.png)
+![png](output_13_1.png)
 
 
 ## 2. Has a binary image been created using color transforms, gradients or other methods?
@@ -181,7 +181,7 @@ ksize = 3 # Choose a larger odd number to smooth gradient measurements
 testOneImage =  mpimg.imread('../test_images/test1.jpg')
 
 # Run the function
-grad_binary = abs_sobel_thresh(testOneImage, orient='x', sobel_kernel=ksize ,thresh=(30, 100))
+grad_binary = abs_sobel_thresh(testOneImage, orient='x', sobel_kernel=ksize ,thresh=(50, 100))
 
 # Plot the result
 f, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 9))
@@ -194,7 +194,7 @@ plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
 ```
 
 
-![png](threshold-gradient.png)
+![png](output_18_0.png)
 
 
 ## Magnitude of the Gradient
@@ -237,7 +237,7 @@ plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
 ```
 
 
-![png](threshold-magnitude.png)
+![png](output_21_0.png)
 
 
 ## Direction of the Gradient
@@ -276,7 +276,7 @@ plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
 ```
 
 
-![png](threshold-gradient-direction.png)
+![png](output_24_0.png)
 
 
 
@@ -317,7 +317,7 @@ plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
 ```
 
 
-![png](combine-threshold.png)
+![png](output_27_0.png)
 
 
 ## Color Spaces Transform
@@ -344,7 +344,7 @@ plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
 ```
 
 
-![png](gray-binary.png)
+![png](output_31_0.png)
 
 
 
@@ -373,7 +373,7 @@ plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
 ```
 
 
-![png](R Binary.png)
+![png](output_34_0.png)
 
 
 ## Experimenting with HLS
@@ -406,7 +406,7 @@ plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
 ```
 
 
-![png](S Binary.png)
+![png](output_38_0.png)
 
 
 ## Experimenting on H (Hue)
@@ -428,7 +428,7 @@ plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
 ```
 
 
-![png](H Binary.png)
+![png](output_40_0.png)
 
 
 ## Experimenting on L (Lightness)
@@ -450,28 +450,70 @@ plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
 ```
 
 
-![png](L Binary.png)
+![png](output_42_0.png)
 
 
-## Combining Color and Gradients
+## Experimenting with HSV
+
+
+```python
+hsv = cv2.cvtColor(testOneImage, cv2.COLOR_RGB2HSV)
+H = hsv[:,:,0]
+S = hsv[:,:,1]
+V = hsv[:,:,2]
+```
+
+## Experimenting on V Channel
+
+
+```python
+thresh = (240, 255)
+v_binary = np.zeros_like(V)
+v_binary[(V > thresh[0]) & (V <= thresh[1])] = 1
+
+
+f, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 9))
+f.tight_layout()
+ax1.imshow(hsv)
+ax1.set_title('V Channel', fontsize=50)
+ax2.imshow(v_binary, cmap='gray')
+ax2.set_title('V Binary', fontsize=50)
+plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
+```
+
+
+![png](output_46_0.png)
+
+
+## Combined R channel , L channel and S channel
 
 
 ```python
 # Edit this function to create your own pipeline.
-def pipeline(img, s_thresh=(170, 255), sx_thresh=(20, 100)):
+#def pipeline(img, s_thresh=(170, 255), sx_thresh=(100, 255), R_thresh=(220, 255)):
+def pipeline(img, s_thresh=(125, 255), sx_thresh=(100, 255), R_thresh=(200, 255)):
     img = np.copy(img)
-    # Convert to HSV color space and separate the V channel
-    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HLS).astype(np.float)
-    l_channel = hsv[:,:,1]
-    s_channel = hsv[:,:,2]
+    # Convert to HLS color space and separate the S channel
+    hls = cv2.cvtColor(img, cv2.COLOR_RGB2HLS).astype(np.float)
+    l_channel = hls[:,:,1]
+    s_channel = hls[:,:,2]
+    
+    gray = cv2.cvtColor(testOneImage, cv2.COLOR_RGB2GRAY)
+    R = testOneImage[:,:,0]
+    
+    
     # Sobel x
-    sobelx = cv2.Sobel(l_channel, cv2.CV_64F, 1, 0) # Take the derivative in x
+    sobelx = cv2.Sobel(l_channel, cv2.CV_64F, 1, 0, ksize=3) # Take the derivative in x
     abs_sobelx = np.absolute(sobelx) # Absolute x derivative to accentuate lines away from horizontal
     scaled_sobel = np.uint8(255*abs_sobelx/np.max(abs_sobelx))
     
     # Threshold x gradient
     sxbinary = np.zeros_like(scaled_sobel)
     sxbinary[(scaled_sobel >= sx_thresh[0]) & (scaled_sobel <= sx_thresh[1])] = 1
+    
+    # Threshold R color channel
+    R_binary = np.zeros_like(R)
+    R_binary[(R >= R_thresh[0]) & (R <= R_thresh[1])] = 1
     
     # Threshold color channel
     s_binary = np.zeros_like(s_channel)
@@ -484,8 +526,12 @@ def pipeline(img, s_thresh=(170, 255), sx_thresh=(20, 100)):
     # Combine the two binary thresholds
     combined_binary = np.zeros_like(sxbinary)
     combined_binary[(s_binary == 1) | (sxbinary == 1)] = 1
-    return color_binary, combined_binary
     
+    combined_binary[((s_binary == 1) & (sxbinary == 1)) | ((sxbinary == 1) & (R_binary == 1))
+                 | ((s_binary == 1) & (R_binary == 1))] = 1
+    
+    return color_binary, combined_binary
+
 result_color_binary, result_combined_binary = pipeline(testOneImage)
 
 # Plot the result
@@ -496,12 +542,12 @@ ax1.imshow(result_color_binary)
 ax1.set_title('Stacked thresholds', fontsize=40)
 
 ax2.imshow(result_combined_binary, cmap='gray')
-ax2.set_title('Combined S channel and gradient thresholds', fontsize=40)
+ax2.set_title('Combined R channel , L channel and S channel', fontsize=40)
 plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
 ```
 
 
-![png](Combined-Channel-Gradient-Threshold.png)
+![png](output_48_0.png)
 
 
 ## 3. Has a perspective transform been applied to rectify the image?
@@ -571,7 +617,7 @@ plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
 ```
 
 
-![png](undistorted-and-warped-image.png)
+![png](output_52_0.png)
 
 
 ## 4. Have lane line pixels been identified in the rectified image and fit with a polynomial?
@@ -593,12 +639,12 @@ plt.plot(histogram)
 
 
 
-    [<matplotlib.lines.Line2D at 0x84807b8>]
+    [<matplotlib.lines.Line2D at 0x8c9b278>]
 
 
 
 
-![png](histogram.png)
+![png](output_55_2.png)
 
 
 
@@ -700,7 +746,7 @@ plt.ylim(720, 0)
 
 
 
-![png](window-slides.png)
+![png](output_57_1.png)
 
 
 
@@ -766,7 +812,7 @@ plt.ylim(720, 0)
 
 
 
-![png](detect-lane.png)
+![png](output_59_1.png)
 
 
 ## 5. Having identified the lane lines, has the radius of curvature of the road been estimated? And the position of the vehicle with respect to center in the lane?
@@ -806,12 +852,12 @@ plt.imshow(result)
 
 
 
-    <matplotlib.image.AxesImage at 0xcad85c0>
+    <matplotlib.image.AxesImage at 0x92b8080>
 
 
 
 
-![png](detect-lane-in-image.png)
+![png](output_64_1.png)
 
 
 ## Pipeline (video)
@@ -825,21 +871,27 @@ areas where improvements could be made?
 
 Yes it the file your reading!!
 
-## Discucssion
+## Discussion
 
-I struggled on the part where the class Line() was suggested to be used in the project to keep track of update image frame's lane lines. And also struggled to figure out why the curvature of the lane is important. I had to go through the video lessons a couple of time to get the hint.
-
-
-I tried my using the same pipeline on the challenge_video.mp4, however the lane detection is off. I think further improvement can be made to have it worked. Please refer to challenge_output.mp4 for the output
-
-Below is the reason I think it failed:
-- The initial binary_warped image generated was from the given image /test_images/test1.jpg
-   Solution : Perharps take a frame image from the challenge_video and recalculate the src and dest points in the birds_eye        method (refer to main.py line 121 and 125)
-   
-   If that is the case, would it be inefficient when using the pipeline for roads with different width length?
+Based on the feedback i got from my previous submission, it was suggested to experiment on R Channel. The combined threshold gave a complete detection of the lane lines. Which is good!!
+The piece of code is available in this write up (def pipeline) and main.py line 83.
 
 
+I am submitting 2 videos output1.mp4 and output2.mp4
 
+output1.mp4 still has the issue passing the curve from shaded area to a sunlight area in second 40.
+
+output2.mp4 is produced by commenting out line 293 (based on my previous submission), abit wobbly in the start
+it solves the problem when passing the curve from shaded area to a sunlight area in second 40.
+
+
+I was told to use the following
+
+a) Implement more/better sanity checks to reject unusable results and replace them with a result from prior frames. Some forms of averaging (of polynomial coefficients) over a few frames may be helpful. However don't over do it, because it is important to avoid reacting too slowly on curves or to changes in vehicle position within the lane. (Unclear on this, any reference?)
+
+b) Continue to investigate color spaces to find a better thresholding solution. (Done)
+
+c) Use an area around the lines fitted in prior images to search for lane pixels in a new image. But be prepared to do a full histogram search if valid data is not obtained for a few frames. The images above suggest this is needed; more precisely, it needs to be implemented in a better way. (Unclear, any reference for this?)
 
 ```python
 
