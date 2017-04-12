@@ -10,26 +10,6 @@ The goals / steps of this project are the following:
 - Run your pipeline on a video stream (start with the test_video.mp4 and later implement on full project_video.mp4) and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
 - Estimate a bounding box for vehicles detected.
 
-
-```python
-import numpy as np
-import cv2
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import time
-from skimage.feature import hog
-from sklearn.preprocessing import StandardScaler
-from sklearn.svm import LinearSVC
-from sklearn.model_selection import train_test_split
-from scipy.ndimage.measurements import label
-%matplotlib inline
-
-from heatMap import *
-from dataPreparation import *
-from featureExtraction import *
-from classifier import *
-```
-
 ### Histogram of Oriented Gradients (HOG)
 
 #### 1. Explain how (and identify where in your code) you extracted HOG features from the training images.
@@ -49,7 +29,7 @@ plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
 ```
 
 
-![png](output_5_0.png)
+![png](output_4_0.png)
 
 
 I started reading sample images provided which are Car and Non Car from the dataset. Above is an example of the vehicles and non vehicles classes.
@@ -152,19 +132,36 @@ plt.title('HOG Visualization')
 
 
 
-    <matplotlib.text.Text at 0x3ff1ed68>
+    <matplotlib.text.Text at 0x52b03748>
 
 
 
 
-![png](output_8_1.png)
+![png](output_7_1.png)
 
 
 
-![png](output_8_2.png)
+![png](output_7_2.png)
 
 
 #### 2. Explain how you settled on your final choice of HOG parameters.
+
+#### Example of Experimenting with Hist Bins and Spatial Size
+
+
+Hist Bins      | cell_per_block | hog_channel | hog_feat | hist_feat | spatial_feat | orient | spatial size | color space | pix per cell | Model | Test Accuracy of SVC (%) | Training Seconds
+------------- | ------------- | ------------- | ------------- | ------------- | -------------  | ------------- | ------------- | ------------- | -------------
+32 | 2| ALL| True | True | True | 9 | 32 | RGB | 8 | Linear SVC | 97.75 | 30.73s
+32 | 2| ALL| True | True | True | 9 | 32 | YCrCb | 8 | Linear SVC | 98.82 | 24.25s
+
+#### Example of Experimenting with different color channel
+
+
+Hist Bins      | cell_per_block | hog_channel | hog_feat | hist_feat | spatial_feat | orient | spatial size | color space | pix per cell | Model | Test Accuracy of SVC (%) | Training Seconds
+------------- | ------------- | ------------- | ------------- | ------------- | -------------  | ------------- | ------------- | ------------- | -------------
+16 | 2| ALL| True | True | True | 9 | 16 | RGB | 8 | Linear SVC | 97.52 | 23.07s
+16 | 2| ALL| True | True | True | 9 | 16 | YCrCb | 8 | Linear SVC | 98.76 | 18.63s
+
 
 I tried various combinations of parameters and settled for the following parameters
 
@@ -179,7 +176,9 @@ I tried various combinations of parameters and settled for the following paramet
 - hist_feat = True
 - hog_feat = True
 
-The color space YCrCb is chosen, because I found the classifier performs better for spatial features , compared to RGB, HLS and HSV
+By trial and error based on the table above, the parameters settled are identified based on the classifier accuracy. The following are the main parameters which I have tried : hog_channel, color spaces, hist bins and spatial size. Above is a sample table of the results recorded.
+
+By recording the results, I slowly tweaked and find the final combination to be the best in terms of accuracy and speed in training the classifier.
 
 
 #### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
@@ -243,7 +242,7 @@ fig.tight_layout()
 ```
 
 
-![png](output_15_0.png)
+![png](output_18_0.png)
 
 
 
@@ -280,18 +279,22 @@ print(round(t2-t, 5), 'Seconds to predict', n_predict,'labels with SVC')
 
     Using spatial binning of: 16 and 16 histogram bins
     Feature vector length: 6108
-    15.97 Seconds to train SVC...
-    Test Accuracy of SVC =  0.9916
-    My SVC predicts:  [ 0.  0.  1.  1.  0.  1.  1.  1.  1.  1.]
-    For these 10 labels:  [ 0.  0.  1.  1.  0.  1.  1.  1.  1.  1.]
-    0.001 Seconds to predict 10 labels with SVC
+    5.1 Seconds to train SVC...
+    Test Accuracy of SVC =  0.9901
+    My SVC predicts:  [ 0.  1.  1.  1.  1.  1.  0.  0.  0.  0.]
+    For these 10 labels:  [ 0.  1.  1.  1.  1.  1.  0.  0.  0.  0.]
+    0.004 Seconds to predict 10 labels with SVC
     
 
 ### Sliding Window Search
 
 #### 1. Describe how (and identify where in your code) you implemented a sliding window search. How did you decide what scales to search and how much to overlap windows?
 
-Below is the sample code given in the lecture. A region of the image where the y value is set to 400 and the y ending value is 656. The image is then resize with a scale of 1.5. A cells_per_step of 2 steps for every scan is used.
+Below is the sample code given in the lecture. A partial region of the image where the y value is set to 400 and the y ending value is 656. 
+
+The image is then resize with a scale of 1.1, 1.5, 1.9 and 2.3. The reason of using multiple scale is because there no way to know what is the size of the car object. A reasonable minimum and maximum scale is used to predict the car to appear in images.
+ 
+A cells_per_step of 2 steps for every scan is used.
 
 The sliding window search is implmented with HOG features extraction at every step of the cell being scanned. The scanned region is then pass to the classifer to predict if it is a car or not a car.
 
@@ -301,7 +304,7 @@ The sliding window search is implmented with HOG features extraction at every st
 ```python
 ystart = 400
 ystop = 656
-scale = 1.5
+scale = 1.5 ## Manually change the scale to [1.1, 1.5, 1.9, 2.3], and check on the produced images
 
 def convert_color(img, conv='RGB2YCrCb'):
     if conv == 'RGB2YCrCb':
@@ -380,8 +383,6 @@ def find_cars(img):
 
 A test on car detection is done with the test images. As you may see there are false positives detection and detections detection in the results, which is very poor. Luckily we can build a heat map from these detections in order to combine overlapping detections and remove false positives. The code for the heat map is located in heatMap.py
 
-### Find cars on test1.jpg
-
 
 ```python
 img = mpimg.imread("../test_images/test1.jpg")
@@ -403,6 +404,8 @@ img = mpimg.imread("../test_images/test6.jpg")
 out_img6 = find_cars(img)
 
 ```
+
+### Find cars on Scale 1.1
 
 
 ```python
@@ -433,7 +436,109 @@ fig.tight_layout()
 ```
 
 
-![png](output_25_0.png)
+![png](output_28_0.png)
+
+
+## Find Cars on Scale 1.5
+
+
+```python
+fig = plt.figure(figsize=(12,5))
+plt.subplot(231)
+plt.imshow(out_img1)
+plt.title('Test 1')
+plt.subplot(232)
+plt.imshow(out_img2)
+plt.title('Test 2')
+plt.subplot(233)
+plt.imshow(out_img3)
+plt.title('Test 3')
+
+plt.subplot(234)
+plt.imshow(out_img4)
+plt.title('Test 4')
+
+plt.subplot(235)
+plt.imshow(out_img5)
+plt.title('Test 5')
+
+plt.subplot(236)
+plt.imshow(out_img5)
+plt.title('Test 6')
+
+fig.tight_layout()
+```
+
+
+![png](output_30_0.png)
+
+
+## Find Cars on Scale 1.9
+
+
+```python
+fig = plt.figure(figsize=(12,5))
+plt.subplot(231)
+plt.imshow(out_img1)
+plt.title('Test 1')
+plt.subplot(232)
+plt.imshow(out_img2)
+plt.title('Test 2')
+plt.subplot(233)
+plt.imshow(out_img3)
+plt.title('Test 3')
+
+plt.subplot(234)
+plt.imshow(out_img4)
+plt.title('Test 4')
+
+plt.subplot(235)
+plt.imshow(out_img5)
+plt.title('Test 5')
+
+plt.subplot(236)
+plt.imshow(out_img5)
+plt.title('Test 6')
+
+fig.tight_layout()
+```
+
+
+![png](output_32_0.png)
+
+
+## Find Car by Scale of 2.3
+
+
+```python
+fig = plt.figure(figsize=(12,5))
+plt.subplot(231)
+plt.imshow(out_img1)
+plt.title('Test 1')
+plt.subplot(232)
+plt.imshow(out_img2)
+plt.title('Test 2')
+plt.subplot(233)
+plt.imshow(out_img3)
+plt.title('Test 3')
+
+plt.subplot(234)
+plt.imshow(out_img4)
+plt.title('Test 4')
+
+plt.subplot(235)
+plt.imshow(out_img5)
+plt.title('Test 5')
+
+plt.subplot(236)
+plt.imshow(out_img5)
+plt.title('Test 6')
+
+fig.tight_layout()
+```
+
+
+![png](output_34_0.png)
 
 
 ### Video Implementation
@@ -639,7 +744,7 @@ fig.tight_layout()
 ```
 
 
-![png](output_33_0.png)
+![png](output_42_0.png)
 
 
 ### Here the resulting bounding boxes are drawn onto the last frame in the series:
@@ -673,7 +778,7 @@ fig.tight_layout()
 ```
 
 
-![png](output_35_0.png)
+![png](output_44_0.png)
 
 
 ### Discussion
@@ -683,15 +788,13 @@ fig.tight_layout()
 
 It took me awhile to understand the concepts. By run through the video lessons and tutorial a few times, I began to grasp the idea on the module. 
 
-In terms of processing the video to produce the detected vechicle, it took around 50 mins. This is quite poor in terms of performance.
+In terms of processing the video to produce the detected vechicle, it took around 50 mins. This is quite poor in terms of performance. Possible improvement is to handle the region of interest with different scale.  For example, smaller windows only need to be used closer to the horizon where the cars will appear smaller in the image. 
 
+In terms of the of the pipeline failing (lighting, weather, traffic, road quality), I believe the chances is high of failure. Additional noises will cause a failure as the classifier was purely trained with a small sample dataset. 
+
+To mitigate such issues, I would recommend the following :
 A bigger dataset to train the model and to explore different supervised learning techniques might make the model more robuts.
 
-
-Questions
-- Why is Test 2 detecting heat and mark an road as a car in test2.jpg
-- Any idea how to make the processing faster?
-- Any reference or resources to refer for vehicle detection ?
 
 
 
